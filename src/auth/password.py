@@ -4,50 +4,54 @@ WARNING: This file contains intentional vulnerabilities for demo purposes.
 """
 import hashlib
 import os
+import secrets
+
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError
 
 
 def hash_password(password: str) -> str:
     """
     Hash a password for storage.
 
-    VULNERABILITY: Weak Cryptography (MEDIUM)
-    MD5 is cryptographically broken and unsuitable for password hashing.
+    Uses Argon2 (winner of the Password Hashing Competition) which is
+    resistant to brute-force and rainbow table attacks.
     """
-    # VULNERABLE: MD5 is fast and weak, susceptible to rainbow tables
-    return hashlib.md5(password.encode()).hexdigest()
+    ph = PasswordHasher()
+    return ph.hash(password)
 
 
 def verify_password(password: str, stored_hash: str) -> bool:
     """
     Verify a password against stored hash.
 
-    VULNERABILITY: Weak Cryptography (MEDIUM)
-    Using MD5 for password verification.
+    Uses Argon2 verification which is timing-safe.
     """
-    # VULNERABLE: MD5 comparison
-    return hash_password(password) == stored_hash
+    ph = PasswordHasher()
+    try:
+        return ph.verify(stored_hash, password)
+    except VerifyMismatchError:
+        return False
 
 
 def hash_password_sha1(password: str) -> str:
     """
-    Hash password with SHA1.
+    Hash password with Argon2.
 
-    VULNERABILITY: Weak Cryptography (MEDIUM)
-    SHA1 is deprecated for security purposes.
+    Uses Argon2 which is a strong, modern password hashing algorithm.
+    Note: Function name retained for backward compatibility.
     """
-    # VULNERABLE: SHA1 is also weak for passwords
-    return hashlib.sha1(password.encode()).hexdigest()
+    ph = PasswordHasher()
+    return ph.hash(password)
 
 
 def generate_reset_token(user_id: str) -> str:
     """
     Generate password reset token.
 
-    VULNERABILITY: Weak token generation (MEDIUM)
-    Predictable token based on user_id.
+    Uses cryptographically secure random token generation.
     """
-    # VULNERABLE: Predictable token, should use secrets.token_urlsafe()
-    return hashlib.md5(f"{user_id}-reset".encode()).hexdigest()
+    return secrets.token_urlsafe(32)
 
 
 def hash_sensitive_data(data: str) -> str:
