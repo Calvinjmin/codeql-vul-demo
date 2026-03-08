@@ -1,53 +1,44 @@
 """
 Password hashing and verification utilities.
-WARNING: This file contains intentional vulnerabilities for demo purposes.
 """
 import hashlib
-import os
+import secrets
+
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError
+
+_ph = PasswordHasher()
 
 
 def hash_password(password: str) -> str:
     """
-    Hash a password for storage.
-
-    VULNERABILITY: Weak Cryptography (MEDIUM)
-    MD5 is cryptographically broken and unsuitable for password hashing.
+    Hash a password for storage using Argon2.
     """
-    # VULNERABLE: MD5 is fast and weak, susceptible to rainbow tables
-    return hashlib.md5(password.encode()).hexdigest()
+    return _ph.hash(password)
 
 
 def verify_password(password: str, stored_hash: str) -> bool:
     """
-    Verify a password against stored hash.
-
-    VULNERABILITY: Weak Cryptography (MEDIUM)
-    Using MD5 for password verification.
+    Verify a password against stored hash using Argon2.
     """
-    # VULNERABLE: MD5 comparison
-    return hash_password(password) == stored_hash
+    try:
+        return _ph.verify(stored_hash, password)
+    except VerifyMismatchError:
+        return False
 
 
 def hash_password_sha1(password: str) -> str:
     """
-    Hash password with SHA1.
-
-    VULNERABILITY: Weak Cryptography (MEDIUM)
-    SHA1 is deprecated for security purposes.
+    Hash password using Argon2 (replaces deprecated SHA1 implementation).
     """
-    # VULNERABLE: SHA1 is also weak for passwords
-    return hashlib.sha1(password.encode()).hexdigest()
+    return _ph.hash(password)
 
 
 def generate_reset_token(user_id: str) -> str:
     """
-    Generate password reset token.
-
-    VULNERABILITY: Weak token generation (MEDIUM)
-    Predictable token based on user_id.
+    Generate a cryptographically secure password reset token.
     """
-    # VULNERABLE: Predictable token, should use secrets.token_urlsafe()
-    return hashlib.md5(f"{user_id}-reset".encode()).hexdigest()
+    return secrets.token_urlsafe(32)
 
 
 def hash_sensitive_data(data: str) -> str:
