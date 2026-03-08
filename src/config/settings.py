@@ -8,16 +8,16 @@ import os
 APP_NAME = "MedSecure Patient Portal"
 APP_VERSION = "1.0.0"
 
-# VULNERABILITY: Hardcoded credentials (HIGH)
-# These should be in environment variables or a secrets manager
+# Database credentials loaded from environment variables
+# Set DATABASE_PASSWORD in your environment or secrets manager
 DATABASE_HOST = "db.medsecure.internal"
 DATABASE_PORT = 5432
 DATABASE_USER = "admin"
-DATABASE_PASSWORD = "MedSecure2024!SuperSecret"  # VULNERABLE: Hardcoded password
+DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD", "")  # Fixed: moved to environment variable
 
-# VULNERABILITY: Hardcoded API keys (HIGH)
-STRIPE_API_KEY = "sk_live_4eC39HqLyjWDarjtT1zdp7dc"  # VULNERABLE: Hardcoded secret
-AWS_SECRET_KEY = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"  # VULNERABLE: Hardcoded secret
+# API keys loaded from environment variables
+STRIPE_API_KEY = os.getenv("STRIPE_API_KEY", "")  # Fixed: moved to environment variable
+AWS_SECRET_KEY = os.getenv("AWS_SECRET_KEY", "")  # Fixed: moved to environment variable
 
 # JWT Configuration
 JWT_SECRET = "super-secret-jwt-key-do-not-share"  # VULNERABLE: Hardcoded secret
