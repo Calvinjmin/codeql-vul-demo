@@ -13,12 +13,12 @@ def export_to_temp_file(patient_id: str, data: str) -> str:
     VULNERABILITY: Insecure Temporary File (LOW)
     tempfile.mktemp() creates predictable path with race condition.
     """
-    # VULNERABLE: mktemp() is deprecated and insecure - py/insecure-temporary-file
-    # Race condition: attacker can create file between mktemp() and open()
-    temp_path = tempfile.mktemp(suffix=".csv", prefix="export_")
-    with open(temp_path, "w") as f:
+    # FIXED: Use NamedTemporaryFile to atomically create and open the file
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".csv", prefix="export_", delete=False
+    ) as f:
         f.write(data)
-    return temp_path
+    return f.name
 
 
 def create_export_workspace() -> str:
@@ -27,9 +27,9 @@ def create_export_workspace() -> str:
 
     VULNERABILITY: Insecure Temporary File (LOW)
     """
-    # VULNERABLE: mktemp() returns path that may be claimed by attacker
-    workspace = tempfile.mktemp(dir="/tmp/exports")
-    os.makedirs(workspace, exist_ok=True)
+    # FIXED: Use mkdtemp() to atomically create a secure temporary directory
+    os.makedirs("/tmp/exports", exist_ok=True)
+    workspace = tempfile.mkdtemp(dir="/tmp/exports")
     return workspace
 
 
@@ -39,11 +39,12 @@ def write_report_temp(report_content: str) -> str:
 
     VULNERABILITY: Insecure Temporary File (LOW)
     """
-    # VULNERABLE: mktemp() - py/insecure-temporary-file
-    report_path = tempfile.mktemp(suffix=".html")
-    with open(report_path, "w") as f:
+    # FIXED: Use NamedTemporaryFile to atomically create and open the file
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".html", delete=False
+    ) as f:
         f.write(report_content)
-    return report_path
+    return f.name
 
 
 def get_temp_upload_path(filename: str) -> str:
@@ -52,6 +53,7 @@ def get_temp_upload_path(filename: str) -> str:
 
     VULNERABILITY: Insecure Temporary File (LOW)
     """
-    # VULNERABLE: os.tempnam() is also insecure - py/insecure-temporary-file
-    base = tempfile.mktemp()
-    return f"{base}_{filename}"
+    # FIXED: Use NamedTemporaryFile to securely generate a unique temp path
+    with tempfile.NamedTemporaryFile(delete=False) as f:
+        temp_path = f.name
+    return f"{temp_path}_{filename}"
