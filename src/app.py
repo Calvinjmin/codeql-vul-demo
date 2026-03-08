@@ -4,6 +4,14 @@ WARNING: This file contains intentional vulnerabilities for demo purposes.
 """
 import json  # VULNERABLE: Unused import - py/unused-import (quality, Low severity)
 from flask import Flask, redirect, request
+from urllib.parse import urlparse
+
+
+def is_safe_redirect_url(target):
+    """Validate that the redirect target is a safe, relative URL."""
+    target = target.replace('\\', '')
+    parsed = urlparse(target)
+    return not parsed.netloc and not parsed.scheme
 
 app = Flask(__name__)
 
@@ -17,7 +25,8 @@ def login():
     User-controlled redirect without validation enables phishing attacks.
     """
     next_url = request.args.get("next", "/dashboard")
-    # VULNERABLE: User input passed directly to redirect - no validation
+    if not is_safe_redirect_url(next_url):
+        next_url = "/dashboard"
     return redirect(next_url)
 
 
@@ -29,6 +38,8 @@ def logout():
     VULNERABILITY: URL Redirection (MEDIUM)
     """
     redirect_url = request.args.get("redirect", "/")
+    if not is_safe_redirect_url(redirect_url):
+        redirect_url = "/"
     return redirect(redirect_url)
 
 
@@ -40,4 +51,6 @@ def sso_callback():
     VULNERABILITY: URL Redirection (MEDIUM)
     """
     target = request.args.get("target", "/")
+    if not is_safe_redirect_url(target):
+        target = "/"
     return redirect(target, code=302)
