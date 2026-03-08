@@ -8,6 +8,8 @@ This is a sample vulnerable application used to demonstrate automated security r
 
 ### HIGH Severity
 - **SQL Injection** - `src/database/queries.py`
+- **SQL Injection (ORM)** - `src/database/orm_queries.py`
+- **Command Injection** - `src/utils/backup.py`
 - **Hardcoded Credentials** - `src/config/settings.py`
 - **Path Traversal** - `src/handlers/file_handler.py`
 - **Insecure Deserialization** - `src/utils/cache.py`
@@ -17,10 +19,14 @@ This is a sample vulnerable application used to demonstrate automated security r
 - **XSS** - `src/views/profile.py`
 - **Weak Cryptography** - `src/auth/password.py`
 - **Missing Authentication** - `src/api/admin.py`
+- **YAML Unsafe Deserialization** - `src/utils/config_loader.py`
+- **LDAP Injection** - `src/auth/ldap_auth.py`
 
 ### LOW Severity
 - **Debug Mode Enabled** - `src/config/app.py`
 - **Open Redirect** - `src/auth/login.py`
+- **ReDoS (Inefficient Regex)** - `src/utils/validation.py`
+- **Insecure Temporary File** - `src/handlers/export.py`
 
 ## Purpose
 

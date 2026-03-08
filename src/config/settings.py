@@ -30,6 +30,10 @@ SMTP_PORT = 587
 SMTP_USER = "notifications@medsecure.com"
 SMTP_PASSWORD = "EmailPass123!"  # VULNERABLE: Hardcoded password
 
+# VULNERABLE: Additional hardcoded secrets
+SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/FAKE/FAKE/placeholder-not-a-real-secret"
+ENCRYPTION_KEY = "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6"  # VULNERABLE: Hardcoded encryption key
+
 
 def get_database_url():
     """Build database connection URL."""

@@ -1,0 +1,10 @@
+# CodeQL configuration for security scanning
+# Uses security-extended suite for broader vulnerability coverage
+# (includes py/sql-injection, py/command-line-injection, py/unsafe-deserialization,
+#  py/redos, py/insecure-temporary-file, py/hardcoded-credentials, py/full-ssrf, etc.)
+name: "CodeQL Config"
+
+disable-default-queries: false
+
+queries:
+  - uses: security-extended
