@@ -21,6 +21,7 @@ This is a sample vulnerable application used to demonstrate automated security r
 - **Missing Authentication** - `src/api/admin.py`
 - **YAML Unsafe Deserialization** - `src/utils/config_loader.py`
 - **LDAP Injection** - `src/auth/ldap_auth.py`
+- **URL Redirection** - `src/app.py` - Flask redirect with user input (py/url-redirection, CVSS 6.1 → Medium)
 
 ### LOW Severity
 - **Debug Mode Enabled** - `src/config/app.py`

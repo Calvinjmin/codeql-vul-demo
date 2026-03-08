@@ -42,6 +42,18 @@ def fetch_external_resource(url: str) -> str:
     return response.text
 
 
+def fetch_internal_healthcheck(url: str) -> dict:
+    """
+    Fetch internal service health (e.g. for load balancer checks).
+
+    VULNERABILITY: Request without certificate validation (HIGH)
+    verify=False disables TLS verification, enabling MITM attacks.
+    """
+    # VULNERABLE: py/request-without-cert-validation
+    response = requests.get(url, verify=False, timeout=5)
+    return {"status": response.status_code}
+
+
 def validate_callback_url(url: str) -> bool:
     """
     Validate a callback URL (insufficient validation).

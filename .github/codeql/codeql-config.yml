@@ -1,10 +1,11 @@
 # CodeQL configuration for security scanning
-# Uses security-extended suite for broader vulnerability coverage
-# (includes py/sql-injection, py/command-line-injection, py/unsafe-deserialization,
-#  py/redos, py/insecure-temporary-file, py/hardcoded-credentials, py/full-ssrf, etc.)
+# Uses security-and-quality for full severity range (High, Medium, Low)
+# - High (7.0+): SQL injection, command injection, ReDoS, weak crypto, etc.
+# - Medium (4.0-6.9): URL redirection (6.1), open redirect
+# - Low: Code quality findings (unused imports, etc.) when present
 name: "CodeQL Config"
 
 disable-default-queries: false
 
 queries:
-  - uses: security-extended
+  - uses: security-and-quality
