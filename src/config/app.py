@@ -4,9 +4,8 @@ WARNING: This file contains intentional vulnerabilities for demo purposes.
 """
 import os
 
-# VULNERABILITY: Debug mode enabled (LOW)
-# Debug mode exposes sensitive information in production
-DEBUG = True  # VULNERABLE: Should be False in production
+# FIX: Debug mode controlled by environment variable, defaults to False
+DEBUG = os.getenv("DEBUG", "false").lower() == "true"
 
 # VULNERABILITY: Verbose error messages (LOW)
 SHOW_DETAILED_ERRORS = True  # VULNERABLE: Exposes stack traces
