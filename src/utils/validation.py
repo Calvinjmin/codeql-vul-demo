@@ -12,9 +12,9 @@ def validate_username(username: str) -> bool:
     VULNERABILITY: ReDoS - Inefficient Regular Expression (LOW)
     Ambiguous regex causes exponential backtracking on crafted input.
     """
-    # VULNERABLE: (a|a)+ pattern - py/redos
-    # Input like "aaaaaaaaaaaaaaaaaaaaaaaaaaaa!" causes exponential time
-    pattern = r"^_(__|.)+_$"
+    # FIXED: Replaced ambiguous `.` with `[^_]` to prevent ReDoS
+    # Previously (__|.)+ allowed `__` to match via `.` as well, causing exponential backtracking
+    pattern = r"^_(__|[^_])+_$"
     return bool(re.match(pattern, username))
 
 
@@ -25,8 +25,9 @@ def validate_email_format(email: str) -> bool:
     VULNERABILITY: ReDoS (LOW)
     Nested quantifiers can cause catastrophic backtracking.
     """
-    # VULNERABLE: (a+)+ style pattern - py/redos
-    pattern = r"^([a-zA-Z0-9]+)+@[a-zA-Z0-9]+\.[a-zA-Z]+$"
+    # FIXED: Removed nested quantifier to prevent ReDoS
+    # Previously ([a-zA-Z0-9]+)+ had redundant nested repetition causing catastrophic backtracking
+    pattern = r"^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z]+$"
     return bool(re.match(pattern, email))
 
 
@@ -36,8 +37,9 @@ def validate_phone(phone: str) -> bool:
 
     VULNERABILITY: ReDoS (LOW)
     """
-    # VULNERABLE: Ambiguous alternation in repetition - py/redos
-    pattern = r"^(\d\d|.)+$"
+    # FIXED: Replaced ambiguous `.` with `[^\d]` to prevent ReDoS
+    # Previously (\d\d|.)+ allowed digits to match via both alternatives, causing exponential backtracking
+    pattern = r"^(\d\d|[^\d])+$"
     return bool(re.match(pattern, phone))
 
 
