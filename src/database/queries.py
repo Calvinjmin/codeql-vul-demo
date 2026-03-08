@@ -20,9 +20,9 @@ def get_patient_by_id(patient_id: str) -> dict:
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # VULNERABLE: Direct string concatenation with user input
-    query = f"SELECT * FROM patients WHERE id = '{patient_id}'"
-    cursor.execute(query)
+    # FIX: Use parameterized query to prevent SQL injection
+    query = "SELECT * FROM patients WHERE id = ?"
+    cursor.execute(query, (patient_id,))
 
     result = cursor.fetchone()
     conn.close()
@@ -39,13 +39,13 @@ def search_patients(name: str, department: str) -> list:
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # VULNERABLE: Multiple injection points
-    query = f"""
+    # FIX: Use parameterized query to prevent SQL injection
+    query = """
         SELECT * FROM patients
-        WHERE name LIKE '%{name}%'
-        AND department = '{department}'
+        WHERE name LIKE ?
+        AND department = ?
     """
-    cursor.execute(query)
+    cursor.execute(query, (f"%{name}%", department))
 
     results = cursor.fetchall()
     conn.close()
@@ -62,9 +62,9 @@ def delete_patient_record(patient_id: str) -> bool:
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # VULNERABLE: SQL injection in DELETE statement
-    query = f"DELETE FROM patients WHERE id = '{patient_id}'"
-    cursor.execute(query)
+    # FIX: Use parameterized query to prevent SQL injection
+    query = "DELETE FROM patients WHERE id = ?"
+    cursor.execute(query, (patient_id,))
 
     conn.commit()
     conn.close()
