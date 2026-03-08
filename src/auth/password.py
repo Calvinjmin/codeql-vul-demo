@@ -5,27 +5,25 @@ WARNING: This file contains intentional vulnerabilities for demo purposes.
 import hashlib
 import os
 
+import bcrypt
+
 
 def hash_password(password: str) -> str:
     """
     Hash a password for storage.
 
-    VULNERABILITY: Weak Cryptography (MEDIUM)
-    MD5 is cryptographically broken and unsuitable for password hashing.
+    Uses bcrypt, which is resistant to brute-force and rainbow table attacks.
     """
-    # VULNERABLE: MD5 is fast and weak, susceptible to rainbow tables
-    return hashlib.md5(password.encode()).hexdigest()
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
 
 def verify_password(password: str, stored_hash: str) -> bool:
     """
     Verify a password against stored hash.
 
-    VULNERABILITY: Weak Cryptography (MEDIUM)
-    Using MD5 for password verification.
+    Uses bcrypt.checkpw for constant-time comparison.
     """
-    # VULNERABLE: MD5 comparison
-    return hash_password(password) == stored_hash
+    return bcrypt.checkpw(password.encode(), stored_hash.encode())
 
 
 def hash_password_sha1(password: str) -> str:
