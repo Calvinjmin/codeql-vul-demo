@@ -1,8 +1,8 @@
 """
 File handling utilities for patient documents.
-WARNING: This file contains intentional vulnerabilities for demo purposes.
 """
 import os
+import re
 import shutil
 
 
@@ -10,15 +10,34 @@ UPLOAD_DIR = "/var/www/uploads"
 ALLOWED_EXTENSIONS = {".pdf", ".jpg", ".png", ".doc", ".docx"}
 
 
+def _sanitize_path_component(value: str) -> str:
+    """Strip directory traversal sequences by extracting the base name."""
+    return os.path.basename(value)
+
+
+def _validate_patient_id(patient_id: str) -> str:
+    """Validate and return a safe patient_id (alphanumeric, hyphens, underscores)."""
+    if not re.match(r"^[a-zA-Z0-9_-]+$", patient_id):
+        raise ValueError("Invalid patient_id format")
+    return patient_id
+
+
+def _safe_patient_dir(patient_id: str) -> str:
+    """Return a validated patient directory path that resides under UPLOAD_DIR."""
+    safe_id = _validate_patient_id(patient_id)
+    patient_dir = os.path.realpath(os.path.join(UPLOAD_DIR, safe_id))
+    if not patient_dir.startswith(os.path.realpath(UPLOAD_DIR) + os.sep):
+        raise ValueError("Invalid patient directory")
+    return patient_dir
+
+
 def get_patient_document(patient_id: str, filename: str) -> bytes:
     """
     Retrieve a patient's document.
-
-    VULNERABILITY: Path Traversal (HIGH)
-    User input is used directly in file path without validation.
     """
-    # VULNERABLE: No path validation, allows ../../../etc/passwd
-    file_path = os.path.join(UPLOAD_DIR, patient_id, filename)
+    patient_dir = _safe_patient_dir(patient_id)
+    safe_filename = _sanitize_path_component(filename)
+    file_path = os.path.join(patient_dir, safe_filename)
 
     with open(file_path, "rb") as f:
         return f.read()
@@ -27,15 +46,12 @@ def get_patient_document(patient_id: str, filename: str) -> bytes:
 def save_patient_document(patient_id: str, filename: str, content: bytes) -> str:
     """
     Save a document for a patient.
-
-    VULNERABILITY: Path Traversal (HIGH)
-    Attacker can write files outside upload directory.
     """
-    # VULNERABLE: No sanitization of patient_id or filename
-    patient_dir = os.path.join(UPLOAD_DIR, patient_id)
+    patient_dir = _safe_patient_dir(patient_id)
     os.makedirs(patient_dir, exist_ok=True)
 
-    file_path = os.path.join(patient_dir, filename)
+    safe_filename = _sanitize_path_component(filename)
+    file_path = os.path.join(patient_dir, safe_filename)
 
     with open(file_path, "wb") as f:
         f.write(content)
@@ -46,15 +62,11 @@ def save_patient_document(patient_id: str, filename: str, content: bytes) -> str
 def delete_patient_documents(patient_id: str) -> bool:
     """
     Delete all documents for a patient.
-
-    VULNERABILITY: Path Traversal (HIGH)
-    Could delete arbitrary directories.
     """
-    # VULNERABLE: No validation allows deleting arbitrary paths
-    patient_dir = os.path.join(UPLOAD_DIR, patient_id)
+    patient_dir = _safe_patient_dir(patient_id)
 
     if os.path.exists(patient_dir):
-        shutil.rmtree(patient_dir)  # VULNERABLE: Could delete system files
+        shutil.rmtree(patient_dir)
 
     return True
 
@@ -62,12 +74,8 @@ def delete_patient_documents(patient_id: str) -> bool:
 def list_patient_documents(patient_id: str) -> list:
     """
     List all documents for a patient.
-
-    VULNERABILITY: Path Traversal (HIGH)
-    Could list contents of arbitrary directories.
     """
-    # VULNERABLE: Allows listing any directory
-    patient_dir = os.path.join(UPLOAD_DIR, patient_id)
+    patient_dir = _safe_patient_dir(patient_id)
 
     if os.path.exists(patient_dir):
         return os.listdir(patient_dir)
