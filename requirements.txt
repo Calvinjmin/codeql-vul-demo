@@ -2,3 +2,4 @@ requests>=2.31.0
 PyYAML>=6.0
 sqlalchemy>=2.0.0
 flask>=3.0.0
+argon2-cffi>=23.1.0
