@@ -1,5 +1,5 @@
 # CodeQL analysis for vulnerability demo repo
-# Runs on push/PR to main and weekly
+# Runs on push/PR to main, weekly, and manual trigger
 name: "CodeQL"
 
 on:
@@ -9,6 +9,7 @@ on:
     branches: [main]
   schedule:
     - cron: "0 0 * * 1"  # Weekly Monday midnight UTC
+  workflow_dispatch: {}   # Allow manual trigger (e.g. for demo)
 
 jobs:
   analyze:
